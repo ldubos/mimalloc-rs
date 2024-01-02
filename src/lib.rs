@@ -7,14 +7,23 @@ use std::alloc::{GlobalAlloc, Layout};
 pub struct Mimalloc;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+/// Process information (time and memory usage)
 pub struct ProcessInfo {
+    /// Elapsed wall-clock time of the process in milli-seconds.
     elapsed_msecs: usize,
+    /// User time in milli-seconds (as the sum over all threads).
     user_msecs: usize,
+    /// System time in milli-seconds.
     system_msecs: usize,
+    /// Current working set size (touched pages).
     current_rss: usize,
+    /// Peak working set size (touched pages).
     peak_rss: usize,
+    /// Current committed memory (backed by the page file).
     current_commit: usize,
+    /// Peak committed memory (backed by the page file).
     peak_commit: usize,
+    /// Count of hard page faults.
     page_faults: usize,
 }
 
@@ -37,7 +46,11 @@ unsafe impl GlobalAlloc for Mimalloc {
 }
 
 impl Mimalloc {
-    /// Returns the current process stats.
+    /// Return process information (time and memory usage).
+    ///
+    /// The `current_rss` is precise on Windows and MacOSX; other systems estimate this using current_commit.
+    ///
+    /// The commit is precise on Windows but estimated on other systems as the amount of read/write accessible memory reserved by mimalloc.
     pub fn process_info() -> ProcessInfo {
         let mut stats = ProcessInfo::default();
 
@@ -55,5 +68,29 @@ impl Mimalloc {
         }
 
         stats
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use mockalloc::Mockalloc;
+
+    #[global_allocator]
+    static GLOBAL: Mockalloc<Mimalloc> = Mockalloc(Mimalloc);
+
+    #[mockalloc::test]
+    fn test_alloc() {
+        let mut a = Vec::new();
+        let mut b = Vec::new();
+
+        for i in 0..1_000_000 {
+            let p = Box::new(i);
+            if i % 2 == 0 {
+                a.push(p);
+            } else {
+                b.push(p);
+            }
+        }
     }
 }
