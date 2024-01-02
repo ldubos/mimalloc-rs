@@ -10,21 +10,21 @@ pub struct Mimalloc;
 /// Process information (time and memory usage)
 pub struct ProcessInfo {
     /// Elapsed wall-clock time of the process in milli-seconds.
-    elapsed_msecs: usize,
+    pub elapsed_msecs: usize,
     /// User time in milli-seconds (as the sum over all threads).
-    user_msecs: usize,
+    pub user_msecs: usize,
     /// System time in milli-seconds.
-    system_msecs: usize,
+    pub system_msecs: usize,
     /// Current working set size (touched pages).
-    current_rss: usize,
+    pub current_rss: usize,
     /// Peak working set size (touched pages).
-    peak_rss: usize,
+    pub peak_rss: usize,
     /// Current committed memory (backed by the page file).
-    current_commit: usize,
+    pub current_commit: usize,
     /// Peak committed memory (backed by the page file).
-    peak_commit: usize,
+    pub peak_commit: usize,
     /// Count of hard page faults.
-    page_faults: usize,
+    pub page_faults: usize,
 }
 
 unsafe impl GlobalAlloc for Mimalloc {
