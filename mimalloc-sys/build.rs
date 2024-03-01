@@ -18,6 +18,9 @@ fn main() {
 
     build.define("MI_DEBUG", "0");
 
+    #[cfg(feature = "secure")]
+    build.define("MI_SECURE", "4");
+
     if build.get_compiler().is_like_msvc() {
         build.cpp(true);
     }
