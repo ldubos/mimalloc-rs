@@ -16,4 +16,3 @@ mockalloc = "0.1"
 
 [features]
 default = []
-secure = []
