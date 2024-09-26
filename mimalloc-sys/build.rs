@@ -1,9 +1,10 @@
 use std::env;
 use std::path::PathBuf;
 
-fn main() {
-    let os = {
-        let target = env::var("TARGET").unwrap();
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let is_debug = env::var("PROFILE")? == "debug";
+    let os: String = {
+        let target = env::var("TARGET")?;
         let parts = target.split("-").collect::<Vec<&str>>();
 
         if parts.len() >= 3 {
@@ -13,7 +14,7 @@ fn main() {
         }
     };
 
-    let mut path: PathBuf = PathBuf::from(&env::var("CARGO_MANIFEST_DIR").unwrap());
+    let mut path: PathBuf = PathBuf::from(&env::var("CARGO_MANIFEST_DIR")?);
     path.push("mimalloc");
 
     let mut build = cc::Build::new();
@@ -23,12 +24,15 @@ fn main() {
     build.file(path.join("src").join("static.c"));
     build.opt_level(3);
 
-    if cfg!(any(target_family = "unix", target_os = "haiku")) {
+    if os == "linux" || os == "macos" {
         build.flag_if_supported("-ftls-model=initial-exec");
     }
 
     build.define("MI_DEBUG", "0");
-    build.define("MI_SECURE", "4");
+
+    if !is_debug {
+        build.define("MI_SECURE", "4");
+    }
 
     if os == "linux" {
         build.define("MIMALLOC_ARENA_EAGER_COMMIT", "2");
@@ -45,4 +49,6 @@ fn main() {
     }
 
     build.compile("mimalloc");
+
+    Ok(())
 }
