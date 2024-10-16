@@ -1,12 +1,17 @@
-[package]
-name = "mimalloc"
+[workspace]
+members = ["mimalloc-sys"]
+
+[workspace.package]
 version = "0.1.1"
 edition = "2021"
 license = "MIT OR Apache-2.0"
-readme = "README.md"
 
-[workspace]
-members = ["mimalloc-sys"]
+[package]
+name = "mimalloc"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+readme = "README.md"
 
 [dependencies]
 mimalloc-sys = { path = "mimalloc-sys", version = "0.1.0" }
